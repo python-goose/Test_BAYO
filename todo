@@ -1,0 +1,71 @@
+# Список задач ✅ 
+
+## Сервис 1 - Лендинг
+✅ 1. Установить виртуальное окружения и запустить скрипт (тест бага)
+✅ 2. Установить ГИТ, узнать как работать с когда есть личный гит хаб и рабочий гит хаб
+✅ 3. Перенести настройки VS Code с винды на линукс (сохранить)
+✅ 4. Сделать два роута, главный и для добавления заявки (fastapi dev landings/main.py) (fastapi dev landings/main.py --port 8000) (uvicorn landings.main:app --port 8000)
+✅ 5. Главная странциа html
+✅ 6. Простая форма на главной странице
+✅ 7. Отправка формы и вывод значений в консоль
+✅ 8. Валидация формы на стороне АПИ
+✅ 9. Простая валидация на стороне клиента
+✅ 10. Разобраться с токеном
+✅ 11. Валидация токена при получении
+✅ 12. Правильная отправка токена со стороны клиента
+✅ 13. Разобраться с редисом, подключение и запись в таблицу
+
+(1) Запуск: sudo systemctl start redis-server
+Остановка: sudo systemctl stop redis-server
+(2) Статус: sudo systemctl status redis-server
+(3) Мониторинг: redis-cli monitor
+Включить автозагрузку: sudo systemctl enable redis-server
+Выключить автозагрузку: sudo systemctl disable redis-server
+
+## Сервис 2 - core
+✅14. Разобраться с БД, подключения, создание таблиц и прочее
+✅15. Установка постгрес
+
+Действия которые нужно выполнить в ручную для того что бы можно было работать с постгрес
+1. Заходим в системную консоль Postgres
+sudo -u postgres psql
+2. Создаем базу данных (не забудь точку с запятой в конце)
+CREATE DATABASE leads_db;
+3. Создаем пользователя admin с паролем admin
+CREATE USER admin WITH PASSWORD 'admin';
+4. Даем пользователю полные права на эту базу
+GRANT ALL PRIVILEGES ON DATABASE leads_db TO admin;
+5. Назначаем admin владельцем базы (нужно для создания таблиц)
+ALTER DATABASE leads_db OWNER TO admin;
+6. Выходим из консоли
+\q
+
+✅ 15. Запуск файла python init_db.py и провепрка
+✅ 16. Установить расшырение для VS code, что бы наглядно видить базу
+
+Текущий статус постгрес: sudo systemctl status postgresql
+Запустить постгрес сервер: sudo systemctl start postgresql
+Остановить сервер: sudo systemctl stop postgresql
+Перезапустить: sudo systemctl restart postgresql
+Выключить авто запуск: sudo systemctl enable postgresql
+Выключить авто заупск: sudo systemctl disable postgresql
+
+✅ 17. Создайть воркер (python3 -m core.worker)
+✅ 18. создайть файл с добавлением тестовых данных (python3 fix_data.py) Товар и Исполнитель
+
+Можно добавить запись в редис командой (сначала redis-cli)
+LPUSH leads_queue '{"name": "Ivan", "phone": "380501112233", "country": "UA", "offer_id": 100, "affiliate_id": 10}'
+LPUSH leads_queue '{"name": "Ivan2", "phone": "380501112234", "country": "UA", "offer_id": 100, "affiliate_id": 10}'
+
+✅ 19. Создать клиента для админ панели (fastapi dev core/main.py --port 8001)(uvicorn core.main:app --port 8001)
+Проверить можно здесь: (передав токен) http://127.0.0.1:8001/docs#/default/get_leads_leads_get
+
+
+✅ 20. Настроить запуск через докер
+Запуск черзе докер: 
+Находясь в корне проекта:
+
+Первый запуск, сборка и старт sudo docker-compose up --build
+запуск если образ собран: sudo docker-compose up
+остановка проекта d sudo docker-compose stop
+Полное удаление контейнеров (очистка) sudo docker-compose down

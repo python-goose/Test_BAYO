@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # 1. База данных PostgreSQL
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: leads_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d leads_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Redis для очереди
+  redis:
+    image: redis:7
+    restart: always
+    ports:
+      - "6379:6379"
+
+  # 3. Сервис инициализации: Создает таблицы и вставляет тестовые данные
+  init_db:
+    build: .
+    command: python init_db.py
+    environment:
+      - PYTHONPATH=/app
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # 4. Landings API (Прием лидов)
+  landings_api:
+    build: .
+    command: uvicorn landings.main:app --host 0.0.0.0 --port 8000
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      init_db:
+        condition: service_completed_successfully
+
+  # 5. Core API (Аналитика и админка)
+  core_api:
+    build: .
+    command: uvicorn core.main:app --host 0.0.0.0 --port 8001
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - .:/app
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      init_db:
+        condition: service_completed_successfully
+
+  # 6. Воркер (Обработка очереди)
+  worker:
+    build: .
+    command: python -m core.worker
+    environment:
+      - PYTHONPATH=/app
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      init_db:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:
