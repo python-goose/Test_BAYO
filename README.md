@@ -56,5 +56,3 @@ sudo docker-compose up --build
 
 FastAPI, SQLAlchemy (Async), Redis, PostgreSQL, Docker Compose.
 
-```
-
